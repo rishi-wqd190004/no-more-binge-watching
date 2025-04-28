@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouTube Tracker</title>
+  <style>
+    body { font-family: sans-serif; padding: 10px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h3>YouTube Binge Tracker</h3>
+  <p id="count">Loading...</p>
+  <button id="reset">Reset Counter</button>
+
+  <script>
+    function updateCount() {
+      chrome.storage.local.get(['videoCount'], (data) => {
+        const count = data.videoCount || 0;
+        document.getElementById('count').textContent = `Videos watched: ${count}`;
+      });
+    }
+
+    document.getElementById('reset').addEventListener('click', () => {
+      chrome.storage.local.set({ videoCount: 0 }, () => {
+        updateCount();
+      });
+    });
+
+    updateCount();
+  </script>
+</body>
+</html>
