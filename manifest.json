@@ -3,7 +3,7 @@
     "name": "YouTube Binge Tracker",
     "version": "1.0",
     "description": "Track how many YouTube videos you watch.",
-    "permissions": ["storage", "scripting"],
+    "permissions": ["tabs", "storage", "scripting"],
     "host_permissions": ["https://www.youtube.com/*"],
     "content_scripts": [
       {

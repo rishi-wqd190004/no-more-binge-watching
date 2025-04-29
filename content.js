@@ -45,29 +45,89 @@ function checkVideoChange() {
 
     chrome.runtime.sendMessage({ type: "updateCount", count: videoCount });
 
-    if (videoCount === 5) {
-      showBigAlert("🎯 You've watched 5 videos! Take a break?");
-    } else if (videoCount === 7) {
-      showBigAlert("🚀 7 videos already! Go do your study!");
+    if (videoCount === 2) {
+      showBigAlert("🎯 You've watched 2 videos! Take a break?");
+    } else if (videoCount === 5) {
+      showBigAlert("🚀 5 videos already! Go do your study!");
     }
   }
 }
 
 function showBigAlert(message) {
-  if (Notification.permission === "granted") {
-    new Notification(message);
-  } else if (Notification.permission !== "denied") {
-    Notification.requestPermission().then(permission => {
-      if (permission === "granted") {
-        new Notification(message);
-      } else {
-        alert(message); // fallback
-      }
-    });
-  } else {
-    alert(message); // fallback
+    // Remove existing modal if any
+    const existing = document.getElementById("binge-tracker-modal");
+    if (existing) existing.remove();
+  
+    // Create modal overlay
+    const modal = document.createElement("div");
+    modal.id = "binge-tracker-modal";
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100vw";
+    modal.style.height = "100vh";
+    modal.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
+    modal.style.zIndex = "99999";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+  
+    // Modal content box
+    const box = document.createElement("div");
+    box.style.background = "#fff";
+    box.style.padding = "24px 32px";
+    box.style.borderRadius = "10px";
+    box.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+    box.style.maxWidth = "400px";
+    box.style.textAlign = "center";
+    box.style.fontFamily = "sans-serif";
+  
+    // Message text
+    const text = document.createElement("p");
+    text.textContent = message;
+    text.style.marginBottom = "20px";
+    text.style.fontSize = "18px";
+    text.style.lineHeight = "1.4";
+  
+    // Buttons container
+    const buttons = document.createElement("div");
+    buttons.style.display = "flex";
+    buttons.style.justifyContent = "center";
+    buttons.style.gap = "12px";
+  
+    // Keep Watching Button
+    const keepBtn = document.createElement("button");
+    keepBtn.textContent = "Keep Watching";
+    keepBtn.style.padding = "8px 16px";
+    keepBtn.style.border = "none";
+    keepBtn.style.borderRadius = "6px";
+    keepBtn.style.background = "#28a745";
+    keepBtn.style.color = "#fff";
+    keepBtn.style.cursor = "pointer";
+    keepBtn.onclick = () => modal.remove();
+  
+    // Close Tab Button
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close YouTube Tab";
+    closeBtn.style.padding = "8px 16px";
+    closeBtn.style.border = "none";
+    closeBtn.style.borderRadius = "6px";
+    closeBtn.style.background = "#dc3545";
+    closeBtn.style.color = "#fff";
+    closeBtn.style.cursor = "pointer";
+    closeBtn.onclick = () => {
+      chrome.runtime.sendMessage({ type: "closeTabRequest" });
+    };
+  
+    // Append everything
+    buttons.appendChild(keepBtn);
+    buttons.appendChild(closeBtn);
+    box.appendChild(text);
+    box.appendChild(buttons);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
   }
-}
+  
 
 // Listen to URL changes because YouTube is a SPA (single-page app)
 let lastUrl = location.href;
