@@ -2,11 +2,9 @@
     "manifest_version": 3,
     "name": "YouTube Binge Tracker",
     "version": "1.0",
-    "description": "Track how much YouTube you watch.",
-    "permissions": ["storage", "tabs"],
-    "host_permissions": [
-      "https://www.youtube.com/*"
-    ],
+    "description": "Track how many YouTube videos you watch.",
+    "permissions": ["storage", "scripting"],
+    "host_permissions": ["https://www.youtube.com/*"],
     "content_scripts": [
       {
         "matches": ["https://www.youtube.com/*"],
@@ -20,6 +18,9 @@
         "48": "icon.png",
         "128": "icon.png"
       }
+    },
+    "background": {
+        "service_worker": "background.js"
     }
   }
   

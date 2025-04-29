@@ -1,6 +1,35 @@
 let videoCount = 0;
 let lastVideoId = '';
 
+// Create a visible counter on the YouTube page
+const counterDiv = document.createElement('div');
+counterDiv.style.position = 'fixed';
+counterDiv.style.bottom = '20px';
+counterDiv.style.right = '20px';
+counterDiv.style.background = 'rgba(0, 0, 0, 0.7)';
+counterDiv.style.color = 'white';
+counterDiv.style.padding = '10px 15px';
+counterDiv.style.fontSize = '16px';
+counterDiv.style.borderRadius = '10px';
+counterDiv.style.zIndex = '9999';
+counterDiv.style.fontFamily = 'sans-serif';
+counterDiv.innerText = 'Videos watched: 0';
+
+function addCounterToPage() {
+    if (document.body) {
+      document.body.appendChild(counterDiv);
+    } else {
+      // Retry after a short delay until body exists
+      setTimeout(addCounterToPage, 100);
+    }
+  }
+  addCounterToPage();
+  
+
+function updateCounterDisplay() {
+  counterDiv.innerText = `Videos watched: ${videoCount}`;
+}
+
 function getVideoIdFromUrl() {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get('v');
@@ -11,18 +40,19 @@ function checkVideoChange() {
   if (currentVideoId && currentVideoId !== lastVideoId) {
     lastVideoId = currentVideoId;
     videoCount++;
+    updateCounterDisplay();
     console.log(`[Binge Tracker] Videos watched: ${videoCount}`);
-    chrome.storage.local.set({ videoCount: videoCount });
+
+    chrome.runtime.sendMessage({ type: "updateCount", count: videoCount });
 
     if (videoCount === 5) {
       showBigAlert("🎯 You've watched 5 videos! Take a break?");
-    } else if (videoCount === 10) {
-      showBigAlert("🚀 10 videos already! Time to touch some grass?");
+    } else if (videoCount === 7) {
+      showBigAlert("🚀 7 videos already! Go do your study!");
     }
   }
 }
 
-// Function to show nice notification
 function showBigAlert(message) {
   if (Notification.permission === "granted") {
     new Notification(message);
@@ -39,7 +69,7 @@ function showBigAlert(message) {
   }
 }
 
-// Monitor for URL changes (because YouTube is a single-page app)
+// Listen to URL changes because YouTube is a SPA (single-page app)
 let lastUrl = location.href;
 new MutationObserver(() => {
   if (location.href !== lastUrl) {
@@ -48,4 +78,6 @@ new MutationObserver(() => {
   }
 }).observe(document, { subtree: true, childList: true });
 
-checkVideoChange(); // initial load
+checkVideoChange(); // Check initial video
+
+console.log("YouTube Binge tracker loaded")
