@@ -49,13 +49,29 @@ function formatTime(seconds) {
 
 // Update counter display and persist to storage
 function updateCounterDisplay() {
-  counterDiv.innerText = `Videos watched: ${videoCount}\nTime spent: ${formatTime(elapsedTime)}`;
-  chrome.storage.local.set({
-    videoCount: Number(videoCount),
-    elapsedTime: Number(elapsedTime),
-    lastVideoId: String(lastVideoId)
-  });
-}
+    counterDiv.innerText = `Videos watched: ${videoCount}\nTime spent: ${formatTime(elapsedTime)}`;
+  
+    // Always save to localStorage as backup
+    localStorage.setItem('videoCount', videoCount);
+    localStorage.setItem('elapsedTime', elapsedTime);
+    localStorage.setItem('lastVideoId', lastVideoId);
+  
+    // Try saving to chrome.storage
+    if (chrome.runtime && chrome.runtime.id) {
+      chrome.storage.local.set({
+        videoCount: Number(videoCount),
+        elapsedTime: Number(elapsedTime),
+        lastVideoId: String(lastVideoId)
+      }, () => {
+        if (chrome.runtime.lastError) {
+          console.warn('Storage error:', chrome.runtime.lastError.message);
+        }
+      });
+    } else {
+      console.debug('Extension context invalidated — skipping chrome.storage set.');
+    }
+  }
+  
 
 // Start timer interval
 function startTimer() {
