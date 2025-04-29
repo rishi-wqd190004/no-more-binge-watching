@@ -22,9 +22,8 @@ function addCounterToPage() {
       // Retry after a short delay until body exists
       setTimeout(addCounterToPage, 100);
     }
-  }
-  addCounterToPage();
-  
+}
+addCounterToPage();
 
 function updateCounterDisplay() {
   counterDiv.innerText = `Videos watched: ${videoCount}`;
@@ -43,7 +42,8 @@ function checkVideoChange() {
     updateCounterDisplay();
     console.log(`[Binge Tracker] Videos watched: ${videoCount}`);
 
-    chrome.runtime.sendMessage({ type: "updateCount", count: videoCount });
+    // Save updated video count to chrome.storage.local
+    chrome.storage.local.set({ videoCount: videoCount });
 
     if (videoCount === 2) {
       showBigAlert("🎯 You've watched 2 videos! Take a break?");
@@ -126,8 +126,7 @@ function showBigAlert(message) {
     box.appendChild(buttons);
     modal.appendChild(box);
     document.body.appendChild(modal);
-  }
-  
+}
 
 // Listen to URL changes because YouTube is a SPA (single-page app)
 let lastUrl = location.href;
@@ -139,5 +138,4 @@ new MutationObserver(() => {
 }).observe(document, { subtree: true, childList: true });
 
 checkVideoChange(); // Check initial video
-
-console.log("YouTube Binge tracker loaded")
+console.log("YouTube Binge tracker loaded");
