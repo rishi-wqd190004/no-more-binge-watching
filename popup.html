@@ -1,16 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YouTube Tracker</title>
   <style>
-    body { font-family: sans-serif; padding: 10px; }
-    button { margin-top: 10px; }
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+    }
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 320px;
+      padding: 20px;
+      text-align: center;
+    }
+    h3 {
+      margin: 0;
+      color: #4CAF50;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    #count {
+      font-size: 18px;
+      color: #444;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .reset-btn {
+      background-color: #f44336;
+      margin-top: 10px;
+    }
+    .reset-btn:hover {
+      background-color: #e53935;
+    }
   </style>
 </head>
 <body>
-  <h3>YouTube Binge Tracker</h3>
-  <p id="count">Loading...</p>
-  <button id="reset">Reset Counter</button>
+
+  <div class="container">
+    <h3>YouTube Binge Tracker</h3>
+    <p id="count">Loading...</p>
+    <button id="reset" class="reset-btn">Reset Counter</button>
+  </div>
 
   <script src="popup.js"></script>
 </body>
