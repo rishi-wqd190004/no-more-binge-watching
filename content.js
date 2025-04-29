@@ -5,9 +5,10 @@ let elapsedTime = 0;
 let timeInterval = null;
 
 // Restore saved count and elapsed time from storage
-chrome.storage.local.get(['videoCount', 'elapsedTime'], (data) => {
+chrome.storage.local.get(['videoCount', 'elapsedTime', 'lastVideoId'], (data) => {
   videoCount = data.videoCount || 0;
   elapsedTime = data.elapsedTime || 0;
+  lastVideoId = data.lastVideoId || '';
 
   // Restore timer if needed
   startTime = Date.now() - (elapsedTime * 1000);
@@ -49,29 +50,25 @@ function formatTime(seconds) {
 
 // Update counter display and persist to storage
 function updateCounterDisplay() {
-    counterDiv.innerText = `Videos watched: ${videoCount}\nTime spent: ${formatTime(elapsedTime)}`;
-  
-    // Always save to localStorage as backup
-    localStorage.setItem('videoCount', videoCount);
-    localStorage.setItem('elapsedTime', elapsedTime);
-    localStorage.setItem('lastVideoId', lastVideoId);
-  
-    // Try saving to chrome.storage
-    if (chrome.runtime && chrome.runtime.id) {
-      chrome.storage.local.set({
-        videoCount: Number(videoCount),
-        elapsedTime: Number(elapsedTime),
-        lastVideoId: String(lastVideoId)
-      }, () => {
-        if (chrome.runtime.lastError) {
-          console.warn('Storage error:', chrome.runtime.lastError.message);
-        }
-      });
-    } else {
-      console.debug('Extension context invalidated — skipping chrome.storage set.');
-    }
+  counterDiv.innerText = `Videos watched: ${videoCount}\nTime spent: ${formatTime(elapsedTime)}`;
+
+  // Also update localStorage for backup
+  localStorage.setItem('videoCount', videoCount);
+  localStorage.setItem('elapsedTime', elapsedTime);
+  localStorage.setItem('lastVideoId', lastVideoId);
+
+  if (chrome.runtime && chrome.runtime.id) {
+    chrome.storage.local.set({
+      videoCount: Number(videoCount),
+      elapsedTime: Number(elapsedTime),
+      lastVideoId: String(lastVideoId)
+    }, () => {
+      if (chrome.runtime.lastError) {
+        console.warn('Storage error:', chrome.runtime.lastError.message);
+      }
+    });
   }
-  
+}
 
 // Start timer interval
 function startTimer() {
@@ -98,13 +95,11 @@ function checkVideoChange() {
     updateCounterDisplay();
     console.log(`[Binge Tracker] Videos watched: ${videoCount}`);
 
-    // Start timer if it hasn’t already
     if (!timeInterval) {
       startTime = Date.now() - (elapsedTime * 1000);
       startTimer();
     }
 
-    // Alert thresholds
     if (videoCount === 2) {
       showBigAlert("🎯 You've watched 2 videos! Take a break?");
     } else if (videoCount === 5) {
@@ -181,7 +176,7 @@ function showBigAlert(message) {
   document.body.appendChild(modal);
 }
 
-// Watch for SPA navigation changes on YouTube
+// Detect YouTube navigation (SPA)
 let lastUrl = location.href;
 new MutationObserver(() => {
   if (location.href !== lastUrl) {
@@ -190,6 +185,17 @@ new MutationObserver(() => {
   }
 }).observe(document, { subtree: true, childList: true });
 
-// Initial load
+// Listen for updates from other tabs
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local') {
+    if (changes.videoCount) videoCount = changes.videoCount.newValue;
+    if (changes.elapsedTime) elapsedTime = changes.elapsedTime.newValue;
+    if (changes.lastVideoId) lastVideoId = changes.lastVideoId.newValue;
+
+    updateCounterDisplay();
+  }
+});
+
+// Initial video check
 checkVideoChange();
-console.log("YouTube Binge Tracker loaded");
+console.log("YouTube Binge Tracker loaded (multi-tab)");
