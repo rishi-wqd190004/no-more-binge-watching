@@ -4,18 +4,29 @@ let startTime = Date.now();
 let elapsedTime = 0;
 let timeInterval = null;
 
-// Restore saved count and elapsed time from storage
-chrome.storage.local.get(['videoCount', 'elapsedTime', 'lastVideoId'], (data) => {
-  videoCount = data.videoCount || 0;
-  elapsedTime = data.elapsedTime || 0;
-  lastVideoId = data.lastVideoId || '';
-
-  // Restore timer if needed
-  startTime = Date.now() - (elapsedTime * 1000);
-  startTimer();
-
-  updateCounterDisplay();
-});
+chrome.storage.local.get(['videoCount', 'elapsedTime', 'lastResetDate'], (data) => {
+    const today = new Date().toDateString();
+  
+    if (data.lastResetDate !== today) {
+      // First visit today or new day — reset everything
+      videoCount = 0;
+      elapsedTime = 0;
+      startTime = Date.now();
+      chrome.storage.local.set({
+        videoCount: 0,
+        elapsedTime: 0,
+        lastResetDate: today
+      });
+    } else {
+      videoCount = data.videoCount || 0;
+      elapsedTime = data.elapsedTime || 0;
+      startTime = Date.now() - (elapsedTime * 1000);
+    }
+  
+    startTimer();
+    updateCounterDisplay();
+  });
+  
 
 // Create a visible counter on the YouTube page
 const counterDiv = document.createElement('div');
@@ -30,6 +41,23 @@ counterDiv.style.borderRadius = '10px';
 counterDiv.style.zIndex = '9999';
 counterDiv.style.fontFamily = 'sans-serif';
 counterDiv.innerText = 'Videos watched: 0';
+
+const resetBtn = document.createElement('button');
+resetBtn.textContent = 'Reset Stats';
+resetBtn.style.marginTop = '8px';
+resetBtn.style.marginLeft = '10px';
+resetBtn.style.padding = '6px 10px';
+resetBtn.style.border = 'none';
+resetBtn.style.borderRadius = '6px';
+resetBtn.style.background = '#007bff';
+resetBtn.style.color = 'white';
+resetBtn.style.cursor = 'pointer';
+resetBtn.style.fontSize = '14px';
+resetBtn.onclick = resetStats;
+
+counterDiv.appendChild(document.createElement('br'));
+counterDiv.appendChild(resetBtn);
+
 
 function addCounterToPage() {
   if (document.body) {
@@ -186,6 +214,21 @@ function showBigAlert(message, forceCloseOnly = false) {
     modal.appendChild(box);
     document.body.appendChild(modal);
 }
+  
+function resetStats() {
+    videoCount = 0;
+    elapsedTime = 0;
+    startTime = Date.now();
+    chrome.storage.local.set({
+      videoCount: 0,
+      elapsedTime: 0,
+      lastVideoId: '',
+      lastResetDate: new Date().toDateString()
+    }, () => {
+      updateCounterDisplay();
+      alert("Stats reset for today.");
+    });
+  }
   
 
 // Detect YouTube navigation (SPA)

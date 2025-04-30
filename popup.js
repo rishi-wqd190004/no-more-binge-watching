@@ -15,12 +15,19 @@ function formatTime(seconds) {
   }
   
   document.addEventListener('DOMContentLoaded', () => {
+    // Reset button handler
     document.getElementById('reset').addEventListener('click', () => {
-      chrome.storage.local.set({ videoCount: 0, elapsedTime: 0 }, () => {
+      const today = new Date().toDateString();
+      chrome.storage.local.set({
+        videoCount: 0,
+        elapsedTime: 0,
+        lastResetDate: today
+      }, () => {
         updateCount();
       });
     });
   
+    // Initial count display
     updateCount();
   });
   
