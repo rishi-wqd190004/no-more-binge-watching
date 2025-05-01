@@ -1,25 +1,30 @@
 {
-    "manifest_version": 3,
-    "name": "YouTube Binge Tracker",
-    "version": "1.0",
-    "description": "Track how many YouTube videos you watch.",
-    "permissions": ["tabs", "storage"],
-    "host_permissions": ["https://www.youtube.com/*"],
-    "content_scripts": [
-      {
-        "matches": ["https://www.youtube.com/*"],
-        "js": ["content.js"]
-      }
-    ],
-    "action": {
-      "default_icon": {
-        "16": "icon.png",
-        "48": "icon.png",
-        "128": "icon.png"
-      }
-    },
-    "background": {
-      "service_worker": "background.js"
+  "manifest_version": 3,
+  "name": "YouTube Binge Tracker",
+  "version": "1.1",
+  "description": "Track how many YouTube videos you watch each day and monitor your screen time.",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"]
     }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   }
-  
+}
