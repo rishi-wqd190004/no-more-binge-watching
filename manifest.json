@@ -3,7 +3,7 @@
   "name": "YouTube Binge Tracker",
   "version": "1.1",
   "description": "Track how many YouTube videos you watch each day and monitor your screen time.",
-  "permissions": ["tabs", "storage"],
+  "permissions": ["storage"],
   "host_permissions": ["https://www.youtube.com/*"],
   "content_scripts": [
     {
