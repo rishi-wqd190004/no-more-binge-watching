@@ -232,30 +232,30 @@ function resetStats() {
   }
   
 
-  let observer; // Declare once, globally or in the appropriate outer scope
+let observer; // Declare once, globally or in the appropriate outer scope
 
-  // Detect YouTube navigation (SPA)
-  let lastUrl = location.href;
-  
-  // Disconnect existing observer if it exists
+// Detect YouTube navigation (SPA)
+let lastUrl = location.href;
+
+// Disconnect existing observer if it exists
+if (observer) observer.disconnect();
+
+// Create new observer
+observer = new MutationObserver(() => {
+  if (location.href !== lastUrl) {
+    lastUrl = location.href;
+    checkVideoChange();
+    addCounterToPage();
+  }
+});
+
+observer.observe(document, { subtree: true, childList: true });
+
+// Cleanup on unload
+window.addEventListener("beforeunload", () => {
   if (observer) observer.disconnect();
-  
-  // Create new observer
-  observer = new MutationObserver(() => {
-    if (location.href !== lastUrl) {
-      lastUrl = location.href;
-      checkVideoChange();
-      addCounterToPage();
-    }
-  });
-  
-  observer.observe(document, { subtree: true, childList: true });
-  
-  // Cleanup on unload
-  window.addEventListener("beforeunload", () => {
-    if (observer) observer.disconnect();
-    clearInterval(timeInterval);
-  });
+  clearInterval(timeInterval);
+});
   
 
 
