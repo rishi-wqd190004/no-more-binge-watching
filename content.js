@@ -60,13 +60,14 @@ counterDiv.appendChild(resetBtn);
 
 
 function addCounterToPage() {
-  if (document.body) {
+  if (document.body && !document.getElementById('yt-binge-counter')) {
+    counterDiv.id = 'yt-binge-counter';
     document.body.appendChild(counterDiv);
-  } else {
+  } else if (!document.getElementById('yt-binge-counter')) {
     setTimeout(addCounterToPage, 100);
   }
 }
-addCounterToPage();
+
 
 // Format seconds to HH:MM:SS
 function formatTime(seconds) {
@@ -231,14 +232,32 @@ function resetStats() {
   }
   
 
-// Detect YouTube navigation (SPA)
-let lastUrl = location.href;
-new MutationObserver(() => {
-  if (location.href !== lastUrl) {
-    lastUrl = location.href;
-    checkVideoChange();
-  }
-}).observe(document, { subtree: true, childList: true });
+  let observer; // Declare once, globally or in the appropriate outer scope
+
+  // Detect YouTube navigation (SPA)
+  let lastUrl = location.href;
+  
+  // Disconnect existing observer if it exists
+  if (observer) observer.disconnect();
+  
+  // Create new observer
+  observer = new MutationObserver(() => {
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
+      checkVideoChange();
+      addCounterToPage();
+    }
+  });
+  
+  observer.observe(document, { subtree: true, childList: true });
+  
+  // Cleanup on unload
+  window.addEventListener("beforeunload", () => {
+    if (observer) observer.disconnect();
+    clearInterval(timeInterval);
+  });
+  
+
 
 // Listen for updates from other tabs
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -254,3 +273,4 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // Initial video check
 checkVideoChange();
 console.log("YouTube Binge Tracker loaded (multi-tab)");
+addCounterToPage();
